@@ -108,7 +108,7 @@ class EstablishAuthenticatedSessionRequest(XMPPElement):
 
 class ConnectionFailedResponse:
     def __init__(self, data: BeautifulSoup):
-        self.message = data.find('msg').text
+        self.message = data.find('msg')  # .text
 
 
 class CaptchaElement:

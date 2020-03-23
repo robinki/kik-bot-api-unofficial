@@ -30,7 +30,8 @@ class KikClient:
     """
 
     def __init__(self, callback: callbacks.KikClientCallback, kik_username=None, kik_password=None,
-                 kik_node=None, log_level=logging.INFO, device_id_override=None, andoid_id_override=None):
+                 kik_node=None, log_level=logging.INFO, device_id_override=None, android_id_override=None,
+                 loop=None):
         """
         Initializes a connection to Kik servers.
         If you want to automatically login too, use the username and password parameters.
@@ -50,14 +51,19 @@ class KikClient:
         self.password = kik_password
         self.kik_node = kik_node
         self.device_id_override = device_id_override
-        self.android_id_override = andoid_id_override
+        self.android_id_override = android_id_override
 
         self.callback = callback
 
         self.connected = False
         self.authenticated = False
         self.connection = None
-        self.loop = asyncio.new_event_loop()
+
+        if not loop:
+            self.loop = asyncio.new_event_loop()
+        else:
+            self.loop = loop
+
         asyncio.set_event_loop(self.loop)
 
         self._known_users_information = set()
@@ -115,9 +121,10 @@ class KikClient:
         """
         self.username = username
         self.password = password
-        login_request = login.LoginRequest(username, password, captcha_result, self.device_id_override, self.android_id_override)
-        log.info("[+] Logging in with username '{}' and a given password..."
-                 .format(username, '*' * len(password)))
+        login_request = login.LoginRequest(
+            username, password, captcha_result, self.device_id_override, self.android_id_override
+        )
+        log.info("[+] Logging in with username '{}' and a given password...".format(username, '*' * len(password)))
         return self._send_xmpp_element(login_request)
 
     def register(self, email, username, password, first_name, last_name, birthday="1974-11-20", captcha_result=None):
